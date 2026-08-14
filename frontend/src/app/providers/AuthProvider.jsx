@@ -75,7 +75,7 @@ export function AuthProvider({ children }) {
       const newUser = {
         id: `demo-${selectedRole.toLowerCase()}-${Date.now()}`,
         email: userEmail || `${selectedRole.toLowerCase()}@healthos.org`,
-        full_name: selectedRole === ROLES.PATIENT ? 'Alex Morgan' : selectedRole === ROLES.HOSPITAL ? 'Metropolitan General Hospital' : 'HealthOS Network Admin',
+        full_name: userEmail ? userEmail.split('@')[0] : (selectedRole === ROLES.PATIENT ? 'Patient Account' : selectedRole === ROLES.HOSPITAL ? 'Hospital Administrator' : 'System Admin'),
         role: selectedRole,
         hospital_status: isPending ? 'PENDING_VERIFICATION' : 'VERIFIED',
       };

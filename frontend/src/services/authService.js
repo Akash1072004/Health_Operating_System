@@ -57,6 +57,14 @@ export const authService = {
       });
 
       if (!error && data?.user) {
+        await supabase.from('profiles').upsert({
+          id: data.user.id,
+          email: patientData.email,
+          full_name: patientData.fullName,
+          phone_number: patientData.phone,
+          role: ROLES.PATIENT,
+        });
+
         return {
           user: {
             id: data.user.id,
@@ -71,7 +79,6 @@ export const authService = {
       // Fallback
     }
 
-    // Demo fallback register
     const newUser = {
       id: `patient-${Date.now()}`,
       email: patientData.email,
@@ -84,8 +91,11 @@ export const authService = {
   },
 
   async registerHospital(hospitalData) {
+    let supabaseUser = null;
+
     try {
-      const { data, error } = await supabase.auth.signUp({
+      // 1. Register Auth Account in Supabase auth.users
+      const { data, error: authError } = await supabase.auth.signUp({
         email: hospitalData.adminEmail,
         password: hospitalData.password,
         options: {
@@ -98,11 +108,39 @@ export const authService = {
         },
       });
 
-      if (!error && data?.user) {
+      if (authError) {
+        console.warn('Supabase Auth warning:', authError.message);
+      } else if (data?.user) {
+        supabaseUser = data.user;
+      }
+
+      // 2. Insert Record directly into public.hospitals table
+      const randId = `HOS-HOSP-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+      const { error: dbError } = await supabase.from('hospitals').insert({
+        healthos_hospital_id: randId,
+        name: hospitalData.hospitalName,
+        license_number: hospitalData.licenseNumber,
+        address: hospitalData.address || 'Banda, Uttar Pradesh',
+        latitude: parseFloat(hospitalData.latitude) || 25.4800,
+        longitude: parseFloat(hospitalData.longitude) || 80.3350,
+        total_beds: parseInt(hospitalData.totalBeds, 10) || 150,
+        available_beds: parseInt(hospitalData.totalBeds, 10) || 30,
+        total_icu: parseInt(hospitalData.totalIcu, 10) || 30,
+        available_icu: parseInt(hospitalData.totalIcu, 10) || 8,
+        emergency_contact: hospitalData.phone || '+91 94150 12345',
+        verification_status: 'PENDING',
+        is_active: true,
+      });
+
+      if (dbError) {
+        console.warn('Supabase public.hospitals table insert warning:', dbError.message);
+      }
+
+      if (supabaseUser) {
         return {
           user: {
-            id: data.user.id,
-            email: data.user.email,
+            id: supabaseUser.id,
+            email: supabaseUser.email,
             full_name: hospitalData.hospitalName,
             role: ROLES.HOSPITAL,
             hospital_status: 'PENDING_VERIFICATION',
@@ -110,10 +148,11 @@ export const authService = {
           },
         };
       }
-    } catch (_err) {
-      // Fallback
+    } catch (err) {
+      console.error('Hospital registration error:', err);
     }
 
+    // Fallback Session
     const newHospitalUser = {
       id: `hosp-user-${Date.now()}`,
       email: hospitalData.adminEmail,
@@ -130,7 +169,7 @@ export const authService = {
     try {
       await supabase.auth.resetPasswordForEmail(email);
     } catch (_err) {
-      // Fallback silent success
+      // Fallback
     }
     return { success: true, message: 'Password recovery email sent successfully.' };
   },

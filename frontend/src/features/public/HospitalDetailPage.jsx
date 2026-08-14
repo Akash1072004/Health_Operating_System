@@ -75,13 +75,18 @@ export function HospitalDetailPage() {
       <div className="hosp-banner-card">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
           <div>
-            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
               <Badge variant="success">
-                <ShieldCheck size={14} /> VERIFIED HEALTHOS PARTNER
+                <ShieldCheck size={14} /> 🟢 HealthOS Verified Facility
               </Badge>
               <Badge variant={hospital.emergencyCapable ? 'danger' : 'info'}>
                 {hospital.type}
               </Badge>
+              {hospital.healthos_hospital_id && (
+                <span style={{ fontSize: '0.75rem', fontWeight: 800, color: '#0284c7', background: '#f0f9ff', border: '1px solid #bae6fd', padding: '0.15rem 0.6rem', borderRadius: 'var(--radius-full)' }}>
+                  ID: {hospital.healthos_hospital_id}
+                </span>
+              )}
             </div>
 
             <h1 style={{ fontSize: '2.5rem', fontWeight: 800, color: '#0f172a', marginTop: '0.75rem' }}>

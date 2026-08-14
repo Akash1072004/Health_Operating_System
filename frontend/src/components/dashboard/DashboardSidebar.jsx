@@ -1,44 +1,41 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import clsx from 'clsx';
+import { useAuth } from '../../app/providers/AuthProvider';
 import { ROLES } from '../../types/roles';
 import {
-  Sparkles,
   LayoutDashboard,
   Building2,
   Calendar,
   AlertTriangle,
-  Bot,
-  HeartPulse,
   FileText,
-  Pill,
-  ShieldCheck,
-  Users,
+  User,
+  Settings,
   Bed,
+  Activity,
   Stethoscope,
+  Users,
   Ambulance,
   BarChart3,
-  Siren,
-  Activity,
+  ShieldCheck,
   Bell,
-  HelpCircle,
-  User,
-  PhoneCall,
-  Home,
-  Info,
+  Sparkles,
+  Bot,
+  Heart,
+  Siren,
+  X,
 } from 'lucide-react';
+import './DashboardLayout.css';
 
-export function DashboardSidebar({ role = ROLES.PATIENT }) {
-  // Public Nav List (All tabs on the LEFT part of the webpage!)
+export function DashboardSidebar({ isMobileOpen, onCloseMobile }) {
+  const { role } = useAuth();
+
+  // Public Visitors Nav List
   const PUBLIC_NAV = [
-    { to: '/', label: 'Home', icon: Home, exact: true },
-    { to: '/about', label: 'About', icon: Info },
-    { to: '/how-it-works', label: 'How it Works', icon: Activity },
+    { to: '/', label: 'Overview', icon: LayoutDashboard },
     { to: '/hospitals', label: 'Find Hospitals', icon: Building2 },
-    { to: '/emergency', label: 'Emergency', icon: AlertTriangle, badge: 'SOS' },
-    { to: '/services', label: 'Services', icon: FileText },
-    { to: '/contact', label: 'Contact', icon: HelpCircle },
-    { to: '/login', label: 'Sign In', icon: User },
+    { to: '/emergency', label: 'Emergency SOS', icon: AlertTriangle, badge: 'SOS' },
+    { to: '/services', label: 'Services', icon: Activity },
+    { to: '/about', label: 'About HealthOS', icon: FileText },
   ];
 
   // Patient Nav List
@@ -46,24 +43,26 @@ export function DashboardSidebar({ role = ROLES.PATIENT }) {
     { to: '/patient/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { to: '/patient/hospitals', label: 'Find Hospitals', icon: Building2 },
     { to: '/patient/appointments', label: 'Appointments', icon: Calendar },
-    { to: '/patient/emergency', label: 'Emergency', icon: AlertTriangle, badge: 'SOS' },
-    { to: '/patient/ai', label: 'AI Assistant', icon: Bot },
-    { to: '/patient/home-care', label: 'Home Care', icon: HeartPulse },
+    { to: '/patient/emergency', label: 'Emergency SOS', icon: AlertTriangle, badge: 'SOS' },
+    { to: '/patient/ai', label: 'AI Symptoms', icon: Bot },
+    { to: '/patient/home-care', label: 'Home Care', icon: Heart },
     { to: '/patient/records', label: 'Health Records', icon: FileText },
-    { to: '/patient/prescriptions', label: 'Prescriptions', icon: Pill },
+    { to: '/patient/prescriptions', label: 'Prescriptions', icon: Stethoscope },
     { to: '/patient/insurance', label: 'Insurance', icon: ShieldCheck },
+    { to: '/patient/profile', label: 'My Emergency Profile', icon: User },
   ];
 
   // Hospital Nav List
   const HOSPITAL_NAV = [
     { to: '/hospital/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { to: '/hospital/verification', label: 'Verification', icon: ShieldCheck },
     { to: '/hospital/patients', label: 'Patients', icon: Users },
     { to: '/hospital/appointments', label: 'Appointments', icon: Calendar },
     { to: '/hospital/beds', label: 'Beds', icon: Bed },
     { to: '/hospital/icu', label: 'ICU', icon: Activity },
     { to: '/hospital/doctors', label: 'Doctors', icon: Stethoscope },
     { to: '/hospital/staff', label: 'Staff', icon: Users },
-    { to: '/hospital/emergency', label: 'Emergency', icon: AlertTriangle, badge: 'LIVE' },
+    { to: '/hospital/emergency', label: 'Emergency Intake', icon: AlertTriangle, badge: 'LIVE' },
     { to: '/hospital/ambulance', label: 'Ambulances', icon: Ambulance },
     { to: '/hospital/inventory', label: 'Inventory', icon: FileText },
     { to: '/hospital/analytics', label: 'Analytics', icon: BarChart3 },
@@ -73,14 +72,11 @@ export function DashboardSidebar({ role = ROLES.PATIENT }) {
   // Admin / Authority Nav List
   const ADMIN_NAV = [
     { to: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { to: '/admin/verifications', label: 'Verifications', icon: ShieldCheck, badge: 'REVIEW' },
     { to: '/admin/network', label: 'Hospital Network', icon: Building2 },
-    { to: '/admin/capacity', label: 'Capacity', icon: Activity },
     { to: '/admin/emergencies', label: 'Emergencies', icon: Siren, badge: 'ALERT' },
-    { to: '/admin/ambulances', label: 'Ambulances', icon: Ambulance },
-    { to: '/admin/resources', label: 'Resources', icon: FileText },
     { to: '/admin/health-trends', label: 'Health Trends', icon: BarChart3 },
-    { to: '/admin/hospitals', label: 'Hospitals', icon: ShieldCheck },
-    { to: '/admin/alerts', label: 'Alerts', icon: Bell },
+    { to: '/admin/settings', label: 'Settings', icon: Settings },
   ];
 
   let navItems = PATIENT_NAV;
@@ -89,36 +85,64 @@ export function DashboardSidebar({ role = ROLES.PATIENT }) {
   if (role === ROLES.ADMIN || role === ROLES.AUTHORITY) navItems = ADMIN_NAV;
 
   return (
-    <aside className="healthos-sidebar">
+    <aside className={`healthos-sidebar ${isMobileOpen ? 'mobile-open' : ''}`}>
       <div>
-        {/* BRAND LOGO TOP LEFT */}
-        <NavLink to="/" className="healthos-brand-logo">
-          <Sparkles className="brand-spark-icon" size={22} />
-          <span>HEALTHOS</span>
-        </NavLink>
+        {/* BRAND LOGO TOP LEFT & MOBILE CLOSE BUTTON */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.75rem' }}>
+          <NavLink to="/" className="healthos-brand-logo" onClick={onCloseMobile} style={{ marginBottom: 0 }}>
+            <Sparkles className="logo-sparkle" size={24} />
+            <div className="brand-text">
+              <span>HealthOS</span>
+            </div>
+          </NavLink>
 
-        {/* LEFT VERTICAL NAVIGATION STACK */}
+          {isMobileOpen && (
+            <button
+              onClick={onCloseMobile}
+              style={{ background: 'transparent', border: 'none', color: '#64748b', cursor: 'pointer', padding: '0.25rem' }}
+              title="Close Menu"
+            >
+              <X size={20} />
+            </button>
+          )}
+        </div>
+
+        {/* NAVIGATION LINKS */}
         <nav className="healthos-nav-list">
-          {navItems.map((item, idx) => {
+          {navItems.map((item) => {
             const Icon = item.icon;
             return (
               <NavLink
-                key={idx}
+                key={item.to}
                 to={item.to}
-                end={item.exact}
-                className={({ isActive }) => clsx('healthos-nav-item', isActive && 'active')}
+                onClick={onCloseMobile}
+                className={({ isActive }) =>
+                  `healthos-nav-item ${isActive ? 'active' : ''}`
+                }
               >
-                <Icon size={18} />
-                <span>{item.label}</span>
-                {item.badge && <span className="healthos-nav-badge">{item.badge}</span>}
+                <Icon className="nav-icon" size={18} />
+                <span className="nav-label">{item.label}</span>
+                {item.badge && (
+                  <span className={`nav-badge ${item.badge === 'SOS' || item.badge === 'ALERT' ? 'sos' : ''}`}>
+                    {item.badge}
+                  </span>
+                )}
               </NavLink>
             );
           })}
         </nav>
       </div>
 
-      <div className="sidebar-footer-text">
-        v1.6.5 © HEALTHOS
+      {/* FOOTER USER / STATUS */}
+      <div className="sidebar-footer">
+        <NavLink
+          to={role === ROLES.ADMIN ? '/admin/settings' : role === ROLES.HOSPITAL ? '/hospital/settings' : '/patient/settings'}
+          className="sidebar-footer-link"
+          onClick={onCloseMobile}
+        >
+          <Settings size={16} />
+          <span>System Settings</span>
+        </NavLink>
       </div>
     </aside>
   );

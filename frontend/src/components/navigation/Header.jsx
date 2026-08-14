@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Bell, User, LogOut, Search, Sparkles, Settings, Building2, ShieldCheck, ChevronDown } from 'lucide-react';
+import { Bell, User, LogOut, Search, Sparkles, Settings, Building2, ShieldCheck, ChevronDown, FileText } from 'lucide-react';
 import { useAuth } from '../../app/providers/AuthProvider';
 import { ROLES } from '../../types/roles';
 import './Header.css';
@@ -17,7 +17,8 @@ export function Header({ roleTitle, showSearch = true }) {
     }
   };
 
-  const displayName = user?.full_name || user?.email?.split('@')[0] || 'Member';
+  const displayName = user?.full_name || user?.email?.split('@')[0] || (user ? 'User Account' : 'Guest User');
+  const currentRole = user?.role || role || ROLES.PATIENT;
 
   return (
     <header className="app-header">
@@ -33,7 +34,7 @@ export function Header({ roleTitle, showSearch = true }) {
             <Search size={16} className="search-icon" />
             <input
               type="text"
-              placeholder="Search hospitals, doctors..."
+              placeholder="Search hospitals in Banda, UP..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={handleSearchSubmit}
@@ -83,39 +84,58 @@ export function Header({ roleTitle, showSearch = true }) {
                     <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{user?.email || 'authenticated@healthos.org'}</div>
                   </div>
 
+                  {/* MY EMERGENCY PROFILE SHORTCUT (PATIENTS ONLY) */}
+                  {(currentRole === ROLES.PATIENT || currentRole === ROLES.PUBLIC) && (
+                    <button
+                      style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%', background: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: 'var(--radius-md)', padding: '0.4rem 0.5rem', fontSize: '0.85rem', color: '#0284c7', fontWeight: 700, cursor: 'pointer', textAlign: 'left', marginBottom: '0.5rem' }}
+                      onClick={() => {
+                        setShowProfileMenu(false);
+                        navigate('/patient/profile');
+                      }}
+                    >
+                      <User size={15} style={{ color: '#0284c7' }} /> My Emergency Profile
+                    </button>
+                  )}
+
                   <div style={{ fontSize: '0.7rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', marginBottom: '0.35rem', letterSpacing: '0.04em' }}>
-                    Switch Portal Dashboard
+                    Signed In Portal
                   </div>
 
-                  <button
-                    style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%', background: 'transparent', border: 'none', padding: '0.35rem 0', fontSize: '0.85rem', color: '#0f172a', fontWeight: 600, cursor: 'pointer', textAlign: 'left' }}
-                    onClick={() => {
-                      setShowProfileMenu(false);
-                      navigate('/patient/dashboard');
-                    }}
-                  >
-                    <User size={15} style={{ color: '#0284c7' }} /> Patient Dashboard
-                  </button>
+                  {currentRole === ROLES.PATIENT && (
+                    <button
+                      style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%', background: 'transparent', border: 'none', padding: '0.35rem 0', fontSize: '0.85rem', color: '#0f172a', fontWeight: 600, cursor: 'pointer', textAlign: 'left' }}
+                      onClick={() => {
+                        setShowProfileMenu(false);
+                        navigate('/patient/dashboard');
+                      }}
+                    >
+                      <User size={15} style={{ color: '#0284c7' }} /> Patient Dashboard
+                    </button>
+                  )}
 
-                  <button
-                    style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%', background: 'transparent', border: 'none', padding: '0.35rem 0', fontSize: '0.85rem', color: '#0f172a', fontWeight: 600, cursor: 'pointer', textAlign: 'left' }}
-                    onClick={() => {
-                      setShowProfileMenu(false);
-                      navigate('/hospital/dashboard');
-                    }}
-                  >
-                    <Building2 size={15} style={{ color: '#10b981' }} /> Hospital Dashboard
-                  </button>
+                  {currentRole === ROLES.HOSPITAL && (
+                    <button
+                      style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%', background: 'transparent', border: 'none', padding: '0.35rem 0', fontSize: '0.85rem', color: '#0f172a', fontWeight: 600, cursor: 'pointer', textAlign: 'left' }}
+                      onClick={() => {
+                        setShowProfileMenu(false);
+                        navigate('/hospital/dashboard');
+                      }}
+                    >
+                      <Building2 size={15} style={{ color: '#10b981' }} /> Hospital Command Dashboard
+                    </button>
+                  )}
 
-                  <button
-                    style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%', background: 'transparent', border: 'none', padding: '0.35rem 0', fontSize: '0.85rem', color: '#0f172a', fontWeight: 600, cursor: 'pointer', textAlign: 'left' }}
-                    onClick={() => {
-                      setShowProfileMenu(false);
-                      navigate('/admin/dashboard');
-                    }}
-                  >
-                    <ShieldCheck size={15} style={{ color: '#2563eb' }} /> Admin / Authority
-                  </button>
+                  {(currentRole === ROLES.ADMIN || currentRole === ROLES.AUTHORITY) && (
+                    <button
+                      style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%', background: 'transparent', border: 'none', padding: '0.35rem 0', fontSize: '0.85rem', color: '#0f172a', fontWeight: 600, cursor: 'pointer', textAlign: 'left' }}
+                      onClick={() => {
+                        setShowProfileMenu(false);
+                        navigate('/admin/dashboard');
+                      }}
+                    >
+                      <ShieldCheck size={15} style={{ color: '#2563eb' }} /> Admin / Authority
+                    </button>
+                  )}
 
                   <div style={{ borderTop: '1px solid #f1f5f9', marginTop: '0.5rem', paddingTop: '0.5rem' }}>
                     <button

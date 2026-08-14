@@ -1,24 +1,40 @@
--- HealthOS Production Database Migration 00001
--- Initial Core Schema Setup for HealthOS Platform
+-- ============================================================
+-- HEALTHOS INITIAL SCHEMA MIGRATION
+-- ============================================================
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
--- ROLES ENUM
-CREATE TYPE user_role AS ENUM ('PUBLIC', 'PATIENT', 'HOSPITAL', 'AUTHORITY', 'ADMIN');
+DO $$ BEGIN
+    CREATE TYPE user_role AS ENUM ('PUBLIC', 'PATIENT', 'HOSPITAL', 'AUTHORITY', 'ADMIN');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
--- EMERGENCY PRIORITY ENUM
-CREATE TYPE emergency_priority AS ENUM ('CRITICAL', 'HIGH', 'MEDIUM', 'LOW');
+DO $$ BEGIN
+    CREATE TYPE bed_status AS ENUM ('AVAILABLE', 'OCCUPIED', 'RESERVED', 'MAINTENANCE');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
--- BED STATUS ENUM
-CREATE TYPE bed_status AS ENUM ('AVAILABLE', 'OCCUPIED', 'RESERVED', 'MAINTENANCE');
-
--- USERS TABLE
+-- PROFILES TABLE
 CREATE TABLE IF NOT EXISTS public.profiles (
-    id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
     email TEXT UNIQUE NOT NULL,
     full_name TEXT,
     role user_role DEFAULT 'PATIENT'::user_role,
     phone_number TEXT,
+    age INTEGER,
+    gender TEXT,
+    blood_group TEXT,
+    allergies TEXT,
+    conditions TEXT,
+    current_medications TEXT,
+    emergency_contact_name TEXT,
+    emergency_contact_phone TEXT,
+    emergency_contact_relation TEXT,
+    address TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -52,21 +68,20 @@ CREATE TABLE IF NOT EXISTS public.beds (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- EMERGENCIES TABLE
-CREATE TABLE IF NOT EXISTS public.emergencies (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    patient_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
-    hospital_id UUID REFERENCES public.hospitals(id) ON DELETE SET NULL,
-    priority emergency_priority DEFAULT 'HIGH'::emergency_priority,
-    location_address TEXT,
-    latitude DOUBLE PRECISION,
-    longitude DOUBLE PRECISION,
-    status TEXT DEFAULT 'PENDING',
-    created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Enable Row Level Security (RLS)
+-- ROW LEVEL SECURITY (RLS) POLICIES
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.hospitals ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.beds ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.emergencies ENABLE ROW LEVEL SECURITY;
+
+-- Profiles Policies
+DROP POLICY IF EXISTS "Public profiles are viewable by everyone" ON public.profiles;
+DROP POLICY IF EXISTS "Users can update own profile" ON public.profiles;
+DROP POLICY IF EXISTS "Allow insert profiles" ON public.profiles;
+
+CREATE POLICY "Public profiles are viewable by everyone" ON public.profiles FOR SELECT USING (true);
+CREATE POLICY "Allow insert profiles" ON public.profiles FOR INSERT WITH CHECK (true);
+CREATE POLICY "Allow update profiles" ON public.profiles FOR UPDATE USING (true);
+
+-- Hospitals & Beds Policies
+CREATE POLICY "Hospitals are viewable by everyone" ON public.hospitals FOR SELECT USING (true);
+CREATE POLICY "Beds are viewable by everyone" ON public.beds FOR SELECT USING (true);

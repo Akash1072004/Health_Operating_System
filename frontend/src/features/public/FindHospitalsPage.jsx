@@ -171,8 +171,13 @@ export function FindHospitalsPage() {
                   </span>
                 </div>
 
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginTop: '0.65rem', color: '#0f172a' }}>
+                <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginTop: '0.65rem', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
                   {hosp.name}
+                  {(hosp.verification_status === 'VERIFIED' || hosp.verification_status === undefined) && (
+                    <span style={{ fontSize: '0.725rem', fontWeight: 800, color: '#15803d', background: '#dcfce7', border: '1px solid #bbf7d0', padding: '0.15rem 0.5rem', borderRadius: 'var(--radius-full)', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                      <ShieldCheck size={12} /> HealthOS Verified
+                    </span>
+                  )}
                 </h3>
                 <p style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
                   <MapPin size={14} style={{ color: '#0284c7' }} /> {hosp.address}, {hosp.city} • <strong style={{ color: '#0f172a' }}>{hosp.distanceKm} km away</strong>
@@ -195,14 +200,14 @@ export function FindHospitalsPage() {
                     <span className="metric-value" style={{ color: hosp.availableBeds > 0 ? '#16a34a' : '#dc2626' }}>
                       {hosp.availableBeds} / {hosp.totalBeds}
                     </span>
-                    <span className="metric-label">Open Beds</span>
+                    <span className="metric-label">Available Beds</span>
                   </div>
 
                   <div className="metric-box">
                     <span className="metric-value" style={{ color: hosp.availableIcu > 0 ? '#0284c7' : '#94a3b8' }}>
                       {hosp.availableIcu} / {hosp.totalIcu}
                     </span>
-                    <span className="metric-label">Open ICU</span>
+                    <span className="metric-label">Available ICUs</span>
                   </div>
 
                   <div className="metric-box">

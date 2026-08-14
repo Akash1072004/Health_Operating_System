@@ -28,7 +28,7 @@
 
 /* Sidebar styling flush on left edge */
 .healthos-sidebar {
-  width: 220px;
+  width: 230px;
   background: #ffffff;
   border-right: 1px solid rgba(226, 232, 240, 0.8);
   display: flex;
@@ -37,13 +37,15 @@
   padding: 1.5rem 1rem;
   flex-shrink: 0;
   min-height: 100vh;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.2s ease;
+  z-index: 100;
 }
 
 .healthos-brand-logo {
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  font-size: 1.2rem;
+  font-size: 1.25rem;
   font-weight: 800;
   color: #0f172a;
   text-decoration: none;
@@ -52,8 +54,8 @@
   margin-bottom: 1.75rem;
 }
 
-.brand-spark-icon {
-  color: #2563eb;
+.logo-sparkle {
+  color: #0284c7;
 }
 
 .healthos-nav-list {
@@ -87,9 +89,9 @@
   box-shadow: 0 4px 14px rgba(15, 23, 42, 0.18);
 }
 
-.healthos-nav-badge {
+.nav-badge {
   margin-left: auto;
-  background-color: #ef4444;
+  background-color: #0284c7;
   color: #ffffff;
   font-size: 0.7rem;
   font-weight: 800;
@@ -97,11 +99,24 @@
   border-radius: var(--radius-full);
 }
 
-.sidebar-footer-text {
-  font-size: 0.75rem;
-  color: #94a3b8;
-  padding: 0.5rem;
+.nav-badge.sos {
+  background-color: #ef4444;
+}
+
+.sidebar-footer {
+  padding-top: 1rem;
+  border-top: 1px solid #f1f5f9;
+}
+
+.sidebar-footer-link {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.5rem 0.75rem;
+  color: #64748b;
+  font-size: 0.85rem;
   font-weight: 600;
+  text-decoration: none;
 }
 
 /* Main workspace area */
@@ -112,6 +127,7 @@
   background: #f1f5f9;
   overflow: hidden;
   min-height: 100vh;
+  width: 100%;
 }
 
 /* Top Header Component */
@@ -123,6 +139,17 @@
   padding: 0 2.25rem;
   background: #ffffff;
   border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+  gap: 1rem;
+}
+
+.mobile-menu-btn {
+  display: none;
+  background: transparent;
+  border: none;
+  color: #0f172a;
+  cursor: pointer;
+  padding: 0.35rem;
+  border-radius: var(--radius-md);
 }
 
 /* Search bar in header */
@@ -207,7 +234,6 @@
   justify-content: center;
   font-weight: 700;
   font-size: 0.85rem;
-  object-fit: cover;
 }
 
 /* Dashboard content area */
@@ -215,6 +241,7 @@
   flex: 1;
   padding: 1.5rem 2.25rem 2.5rem;
   overflow-y: auto;
+  box-sizing: border-box;
 }
 
 /* Popover Panels */
@@ -223,6 +250,7 @@
   top: 60px;
   right: 2.25rem;
   width: 320px;
+  max-width: calc(100vw - 2rem);
   background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: var(--radius-lg);
@@ -237,25 +265,65 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-@media (max-width: 1100px) {
-  .healthos-sidebar {
-    width: 70px;
-    padding: 1.5rem 0.5rem;
+/* Backdrop for Mobile Sidebar Drawer */
+.sidebar-overlay-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(4px);
+  z-index: 99;
+  animation: fadeIn 0.2s ease;
+}
+
+/* RESPONSIVE BREAKPOINTS */
+
+@media (max-width: 1024px) {
+  .healthos-top-header {
+    padding: 0 1.25rem;
   }
-  .healthos-nav-item span, .healthos-brand-logo span, .healthos-nav-badge, .sidebar-footer-text {
-    display: none;
-  }
-  .healthos-nav-item {
-    justify-content: center;
-    padding: 0.75rem;
+  .healthos-dashboard-content {
+    padding: 1.25rem;
   }
 }
 
 @media (max-width: 768px) {
+  .mobile-menu-btn {
+    display: flex;
+    align-items: center;
+  }
   .healthos-sidebar {
-    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    height: 100vh;
+    z-index: 1000;
+    transform: translateX(-100%);
+    box-shadow: 4px 0 24px rgba(15, 23, 42, 0.15);
+  }
+  .healthos-sidebar.mobile-open {
+    transform: translateX(0);
   }
   .healthos-search-bar {
-    width: 180px;
+    width: 150px;
+  }
+  .healthos-search-bar input {
+    font-size: 0.775rem;
+    padding-left: 2.2rem;
+  }
+  .popover-panel {
+    right: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .healthos-search-bar {
+    display: none;
+  }
+  .healthos-top-header {
+    padding: 0 0.85rem;
+  }
+  .healthos-dashboard-content {
+    padding: 1rem 0.85rem 5rem;
   }
 }
