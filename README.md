@@ -1,6 +1,6 @@
 # HealthOS 🏥⚡
 
-An enterprise-grade, modular Health Operating System architecture built with a **FastAPI (Python)** backend and a **React + Vite** frontend.
+An enterprise-grade, modular Health Operating System architecture built with a **FastAPI (Python)** backend and a *React + Vite* frontend.
 
 ---
 
